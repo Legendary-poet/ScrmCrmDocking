@@ -1,0 +1,31 @@
+{
+  "traceId": "E-O.duodian2022.1100-5286114de98d495e",
+  "data": {
+    "dataList": [
+      {
+        "email": "fanfuchun@noxgroup.com",
+        "name": "春哥测试",
+        "_id": "6346866810c5c1000194ddee",
+        "owner": [
+          "FSUID_74492535B6510CE5DD0010A8B42C5E3B"
+        ],
+        "mobile": "15801251936"
+      },
+      {
+        "email": "fanfuchun@noxgroup.com",
+        "name": "春哥测试",
+        "_id": "6333b3cab47c940001d5e7f7",
+        "owner": [
+          "FSUID_74492535B6510CE5DD0010A8B42C5E3B"
+        ],
+        "mobile": "15801251936"
+      }
+    ],
+    "offset": 0,
+    "limit": 100,
+    "total": 2
+  },
+  "errorDescription": "success",
+  "errorMessage": "OK",
+  "errorCode": 0
+}
