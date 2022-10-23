@@ -2,7 +2,11 @@ package com.nox.kol;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.nox.kol.service.CRMAPIService;
+import com.nox.kol.service.DuplicateCheckService;
 import com.nox.kol.service.SCRMAPIService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +23,17 @@ import java.util.ArrayList;
 @EnableAsync
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
+@Slf4j
 public class ScrmTest {
 
     @Autowired
     private SCRMAPIService SCRMAPIService;
+
+    @Autowired
+    private CRMAPIService CRMAPIService;
+
+    @Autowired
+    private DuplicateCheckService duplicateCheckService;
 
     @Test
     public void testRedis(){
@@ -30,7 +41,7 @@ public class ScrmTest {
     }
 
     @Test
-    public void requestAllLeadList() throws IOException {
+    public void requestAllLeadListToExcel() throws IOException {
         String result =null;
         int total;
         //查询total
@@ -187,6 +198,7 @@ public class ScrmTest {
                     redisTemplate.opsForValue().set("latestLeadid",lds_id);
                     flag2=1;
 //                    System.out.println(l);
+
                 }
 
             } catch (Exception e) {
@@ -199,9 +211,63 @@ public class ScrmTest {
         if(arrayList.size()!=0){
             //有新线索
             for (JSONObject leads : arrayList) {
+                String lds_id = (String) leads.get("lds_id");
                 String mobile = (String) leads.get("mobile");
                 String email = (String) leads.get("email");
+                String lds_belonger = (String) leads.get("lds_belonger");
                 //线索手机号查重
+                if (!"".equals(mobile)) {//不为空进行查重
+                    int checkTheLeadsPhoneNumber = duplicateCheckService.checkTheLeadsPhoneNumber(lds_id, mobile);
+                    if (checkTheLeadsPhoneNumber == 1) {
+                        //线索手机号重复
+                        continue;
+                    }
+                }
+                //线索邮箱查重
+                int checkTheLeadsEmail = duplicateCheckService.checkTheLeadsEmail(lds_id, email);
+                if (checkTheLeadsEmail == 1) {
+                    //线索邮箱重复
+                    continue;
+                }
+                //联系人手机号查重
+                //联系人电话查重
+                //联系人邮箱查重
+                //客户名称查重
+                //联系人邮箱域名查重
+                //线索邮箱域名查重
+                //线索公司名称查重
+
+
+                //2.1 创建一个新线索
+                String objectIds;
+                try {
+                    objectIds = CRMAPIService.createLeadsObj(leads);
+                } catch (IOException e) {
+                    log.error("创建新线索 " + leads.get("lds_id") + " 失败");
+                    throw new RuntimeException(e);
+                }
+
+                //根据lds_belonger查openUserId
+                String openUserId = null;
+                try {
+                    openUserId = CRMAPIService.queryOpenUserIdByName(lds_belonger);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                ;
+                //2.2 给leads分配owner
+                try {
+                    result = CRMAPIService.allocateOwner(objectIds, openUserId);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                //2.3 致趣线索映射到crm新线索
+                try {
+                    String result1 = SCRMAPIService.updateLead(lds_id, "member_27105", openUserId);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
 
             }
@@ -209,7 +275,6 @@ public class ScrmTest {
         }
 
     }
-
     @Test
     public void requestLeadListTime() {
         String result =null;
@@ -222,19 +287,213 @@ public class ScrmTest {
         System.out.println(result);
     }
 
-    @Test
-    public void updateLead() {
-        String result =null;
-        try {
-            result=  SCRMAPIService.updateLead();
-//            JSONObject jsonObject = JSON.parseObject(result);
-//            JSONObject data = jsonObject.getJSONObject("data");
-//            JSONArray list = data.getJSONArray("list");
+//    @Test
+//    public void updateLead() {
+//        String result =null;
+//        try {
+//            result=  SCRMAPIService.updateLead();
+////            JSONObject jsonObject = JSON.parseObject(result);
+////            JSONObject data = jsonObject.getJSONObject("data");
+////            JSONArray list = data.getJSONArray("list");
+//
+//        } catch (Exception e) {
+//            System.out.println(e.toString());
+//        }
+//        System.out.println(result);
+//    }
 
-        } catch (Exception e) {
-            System.out.println(e.toString());
+
+    @Test
+    public void requestAllLeadList() throws IOException {
+        String result =null;
+        int total;
+        int count1=0;
+        int count2=0;
+        int count3=0;
+        int count4=0;
+        int count5=0;
+        int count6=0;
+        int count7=0;
+        int count8=0;
+        int count9=0;
+        //查询total
+        try {
+            result=  SCRMAPIService.requestLeadListPage(1);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            JSONObject data = jsonObject.getJSONObject("data");
+            Object t = data.get("total");
+            total= (int) t;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        System.out.println(result);
+
+        //查询现有所有线索
+        int totalPage=total/100+(total%100!=0?1: 0);
+        for(int i=1;i<=totalPage;i++) {
+            try {
+
+                result = SCRMAPIService.requestLeadListPage(i);//i为页数
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                JSONObject data = jsonObject.getJSONObject("data");
+                JSONArray list = data.getJSONArray("data");
+
+
+
+                for(int j=0;j<list.size();j++) {
+                    JSONObject leads = list.getJSONObject(j);
+                    System.out.println("第"+j);
+                    String lds_id = (String) leads.get("lds_id");
+                    String mobile = (String) leads.get("mobile");
+                    String email = (String) leads.get("email");
+                    String company = (String) leads.get("member_25956");
+                    String lds_belonger = (String) leads.get("lds_belonger");
+
+                    //1线索手机号查重
+                    if (!"".equals(mobile)) {//不为空进行查重
+                        int checkTheLeadsPhoneNumber = duplicateCheckService.checkTheLeadsPhoneNumber(lds_id, mobile);
+                        if (checkTheLeadsPhoneNumber >= 1) {
+                            //线索手机号重复
+                            count1++;
+                            System.out.println("count1"+count1);
+                            continue;
+                        }
+                    }
+                    //1线索邮箱查重
+                    int checkTheLeadsEmail = duplicateCheckService.checkTheLeadsEmail(lds_id, email);
+                    if (checkTheLeadsEmail == 1) {
+                        //线索邮箱重复
+                        count2++;
+                        System.out.println("count1"+count1);
+                        continue;
+                    }
+                    //1联系人手机号查重
+                    String result3=  CRMAPIService.checkTheContactMobile(mobile);
+                    JSONObject jsonObject3 = JSONObject.parseObject(result3);
+                    JSONArray jsonArray3 = jsonObject3.getJSONObject("data").getJSONArray("dataList");
+                    if (jsonArray3.size()==0){
+                        //没有重复
+                    }else if(jsonArray3.size()>=1) {
+                        //有重复
+                        count3++;
+                        System.out.println("count1"+count1);
+                        continue;
+                    }
+                    //1联系人电话查重
+                    String result4=  CRMAPIService.checkTheContactTel(mobile);
+                    JSONObject jsonObject4 = JSONObject.parseObject(result4);
+                    JSONArray jsonArray4 = jsonObject4.getJSONObject("data").getJSONArray("dataList");
+                    if (jsonArray4.size()==0){
+                        //没有重复
+                    }else if(jsonArray4.size()>=1) {
+                        //有重复
+                        count4++;
+                        System.out.println("count4"+count4);
+                        continue;
+                    }
+                    //1联系人邮箱查重
+                    String result5=  CRMAPIService.checkTheContactEmail(email);
+                    JSONObject jsonObject5 = JSONObject.parseObject(result5);
+                    JSONArray jsonArray5 = jsonObject5.getJSONObject("data").getJSONArray("dataList");
+                    if (jsonArray5.size()==0){
+                        //没有重复
+                    }else if(jsonArray5.size()>=1) {
+                        //有重复
+                        count5++;
+                        System.out.println("count5"+count5);
+                        continue;
+                    }
+                    //1客户名称查重
+                    String result6=  CRMAPIService.checkTheAccountName(company);
+                    JSONObject jsonObject6 = JSONObject.parseObject(result6);
+                    JSONArray jsonArray6 = jsonObject6.getJSONObject("data").getJSONArray("dataList");
+                    if (jsonArray6.size()==0){
+                        //没有重复
+                    }else if(jsonArray6.size()>=1) {
+                        //有重复
+                        count6++;
+                        System.out.println("count6"+count6);
+                        continue;
+                    }
+                    //1联系人邮箱域名查重
+                    String endEmail= StringUtils.substringAfter(email, "@");
+                    System.out.println(endEmail);
+                    if(!("outlook.com".equals(endEmail)||("gmail.com".equals(endEmail))||("qq.com".equals(endEmail))||"163.com".equals(endEmail)||"126.com".equals(endEmail))){
+                        String result7=  CRMAPIService.checkTheContactEndEmail(endEmail);
+                        JSONObject jsonObject7 = JSONObject.parseObject(result7);
+                        JSONArray jsonArray7 = jsonObject7.getJSONObject("data").getJSONArray("dataList");
+                        if (jsonArray7.size()==0){
+                            //没有重复
+                        }else if(jsonArray7.size()>=1) {
+                            //有重复
+                            count7++;
+                            System.out.println("count7"+count7);
+                            continue;
+                        }
+                        //1线索邮箱域名查重
+                        String result8=  CRMAPIService.checkTheLeadsEndEmail(endEmail);
+                        JSONObject jsonObject8 = JSONObject.parseObject(result8);
+                        JSONArray jsonArray8 = jsonObject8.getJSONObject("data").getJSONArray("dataList");
+                        if (jsonArray8.size()==0){
+                            //没有重复
+                        }else if(jsonArray8.size()>=1) {
+                            //有重复
+                            count8++;
+                            System.out.println("count8"+count8);
+                            continue;
+                        }
+
+                    }
+
+                    //1线索公司名称查重
+                    String result9=  CRMAPIService.checkTheLeadsCompany(company);
+                    JSONObject jsonObject9 = JSONObject.parseObject(result9);
+                    JSONArray jsonArray9 = jsonObject9.getJSONObject("data").getJSONArray("dataList");
+                    if (jsonArray9.size()==0){
+                        //没有重复
+                    }else if(jsonArray9.size()>=1) {
+                        //有重复
+                        count9++;
+                        System.out.println("count9"+count9);
+                        continue;
+                    }
+
+
+
+                }
+
+
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+//            System.out.println(result);
+        }
+
+        System.out.println(count1);
+        System.out.println(count2);
+        System.out.println(count3);
+        System.out.println(count4);
+        System.out.println(count5);
+        System.out.println(count6);
+        System.out.println(count7);
+        System.out.println(count8);
+        System.out.println(count9);
     }
 
+
+//
+//    @Test
+//    public void queById() throws IOException {
+//        String result =null;
+//        try {
+//            result=  SCRMAPIService.queById();
+//            JSONObject jsonObject = JSONObject.parseObject(result);
+//            JSONObject data = jsonObject.getJSONObject("data");
+//            Object t = data.get("total");
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//
+//    }
 }

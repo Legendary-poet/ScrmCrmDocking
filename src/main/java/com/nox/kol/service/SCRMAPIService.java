@@ -440,7 +440,7 @@ public class SCRMAPIService {
      * @return
      * @throws IOException
      */
-    public String updateLead() throws IOException{
+    public String updateLead(String leads_id,String field,String value ) throws IOException{
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> params1 = new HashMap<>();
 
@@ -450,9 +450,9 @@ public class SCRMAPIService {
         params.put("tim", (System.currentTimeMillis() / 1000));
         System.out.println((System.currentTimeMillis() / 1000));
 
-        params.put("leads_id", "17831058");
+        params.put("leads_id", leads_id);
         params.put("3rd_party_id", "");
-        params1.put("member_27105","123456");
+        params1.put(field,value);
 //        params1.put("member_27105","12345");
 
         params.put("field_data", params1);
@@ -468,8 +468,8 @@ public class SCRMAPIService {
         String token = buildToken(tokenBuildMap);
         System.out.println(token);
 
-//        params.put("tok", token);
-        params.put("tok", "2579ffab06769dca74f561e74731d46b");
+        params.put("tok", token);
+//        params.put("tok", "2579ffab06769dca74f561e74731d46b");
         try {
             OkHttpClient okHttpClient = new OkHttpClient();
             String body = JSONObject.toJSONString(params);
@@ -529,6 +529,102 @@ public class SCRMAPIService {
             RequestBody requestBody = RequestBody.create(MediaType.parse("json"), body);
             Request request = new Request.Builder()
                     .url("https://leads.scrmtech.com/api/website/leads-api/leads-list")
+                    .post(requestBody)
+                    .build();
+            Call call = okHttpClient.newCall(request);
+            Response execute = call.execute();
+            if (execute.code() != 200) {
+                throw new KOLException(ErrorConstant.ERROR_NUM_11002, ErrorConstant.ERROR_11002_ERROR);
+            }
+            return execute.body().string();
+        } catch (Exception e) {
+            logger.error("requestLeadList Failed Cause By {}", e);
+            throw e;
+        }
+
+    }
+
+//    /**
+//     * 获取会员标签接口
+//     * @return
+//     * @throws IOException
+//     */
+//    public String getTags() throws IOException{
+//        Map<String, Object> params = new HashMap<>();
+//        Map<String, Object> params1 = new HashMap<>();
+//
+//        params.put("src", src);
+//        params.put("pky", pky);
+//        params.put("mid", mainId);
+//        params.put("tim", 1552992261);
+////        System.out.println((System.currentTimeMillis() / 1000));
+//        params.put();
+//
+//
+//        TreeMap<String, Object> tokenBuildMap = new TreeMap<>();
+//        Set<String> paramsKey = params.keySet();
+//        Iterator<String> iterator = paramsKey.iterator();
+//        while (iterator.hasNext()) {
+//            String key = iterator.next();
+//            tokenBuildMap.put(key, params.get(key));
+//        }
+//        String token = buildToken(tokenBuildMap);
+////        System.out.println(token);
+//
+//        params.put("tok", token);
+//        System.out.println(token);
+//        try {
+//            OkHttpClient okHttpClient = new OkHttpClient();
+//            String body = JSONObject.toJSONString(params);
+//            RequestBody requestBody = RequestBody.create(MediaType.parse("json"), body);
+//            Request request = new Request.Builder()
+//                    .url("https://api.ma.scrmtech.com/app-api/member/gettags")
+//                    .post(requestBody)
+//                    .build();
+//            Call call = okHttpClient.newCall(request);
+//            Response execute = call.execute();
+//            if (execute.code() != 200) {
+//                throw new KOLException(ErrorConstant.ERROR_NUM_11002, ErrorConstant.ERROR_11002_ERROR);
+//            }
+//            return execute.body().string();
+//        } catch (Exception e) {
+//            logger.error("requestLeadList Failed Cause By {}", e);
+//            throw e;
+//        }
+//
+//    }
+
+
+
+    public String queById() throws IOException{
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("src", src);
+        params.put("pky", pky);
+        params.put("mid", mainId);
+        params.put("tim", "1665541793");
+//        System.out.println((System.currentTimeMillis() / 1000));
+
+        params.put("mobile", "13718779703");
+
+
+        TreeMap<String, Object> tokenBuildMap = new TreeMap<>();
+        Set<String> paramsKey = params.keySet();
+        Iterator<String> iterator = paramsKey.iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            tokenBuildMap.put(key, params.get(key));
+        }
+        String token = buildToken(tokenBuildMap);
+       System.out.println(token);
+
+        params.put("tok", token);
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            String body = JSONObject.toJSONString(params);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("json"), body);
+            Request request = new Request.Builder()
+                    .url("https://leads-stg.ma.scrmtech.com/api/website/leads-api/leads-info")
                     .post(requestBody)
                     .build();
             Call call = okHttpClient.newCall(request);

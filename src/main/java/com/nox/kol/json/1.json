@@ -1,8 +1,193 @@
-{"relation": "and", "params": [{"name": "lds_create_time", "search_type": "between_and", "label": "创建时间", "field_type": "2", "value": ["2022-10-1", "2022-10-12"]}]}
-["Sushma"]
-
-mid32088page1page_size10pkyduodiankeji202208srcduodiankejitim1665627913
-condition%7Bparams%5B%7Bparams%5B%7Bnamename%2C+label%E5%A7%93%E5%90%8D%2C+search_typelike%2C+field_type3%2C+value%5BSushma%5D%7D%5D%2C+relationand%7D%5D%2C+relationand%7Dmid32088page1page_size10pkyduodiankeji202208srcduodiankejitim1665627830
-
-
-params%5B%7Bcondition%7Bparams%5B%7Bnamename%2C+label%E5%A7%93%E5%90%8D%2C+search_typelike%2C+field_type3%2C+value%5BSushma%5D%7D%5D%2C+relationand%7D%5D%2C+relationand%7Dmid32088page1page_size10pkyduodiankeji202208srcduodiankejitim1665627830
+{
+  "traceId": "E-O.fktest188.1453-b58447809e034e27",
+  "data": {
+    "language": "zh-CN",
+    "extend_obj_data_id": "5fe2cefb8559b5000114130b",
+    "created_by__r": {
+      "picAddr": "",
+      "description": "",
+      "dept": "1000",
+      "supervisorId": "1006",
+      "modifyTime": 1591759818876,
+      "post": "",
+      "createTime": 1587462141009,
+      "phone": "",
+      "name": "蒋小川1",
+      "nickname": "蒋小川1",
+      "tenantId": "590163",
+      "id": "1453",
+      "email": "",
+      "status": 0
+    },
+    "employee_create_time": 1608699643128,
+    "owner_department_id": "1000",
+    "owner_department": "董事会",
+    "lock_status": "0",
+    "name_spell": "321JIANGdsaXIAOCHUAN1122212",
+    "data_own_department__r": {
+      "deptName": "董事会",
+      "deptId": "1000",
+      "parentId": "999999",
+      "status": 0
+    },
+    "create_time": 1608699643328,
+    "version": "4",
+    "created_by": [
+      "FSUID_CBF443F942C4ABE8A46BE859066A5CD1"
+    ],
+    "relevant_team": [
+      {
+        "teamMemberEmployee": [
+          "FSUID_56AE2B41FD274A4D1D885209AB1F27CC"
+        ],
+        "teamMemberRole": "1",
+        "teamMemberPermissionType": "2"
+      }
+    ],
+    "data_own_department": [
+      "1000"
+    ],
+    "phone": "15276864790",
+    "user_id": "1516",
+    "name": "321蒋dsa小船1122212",
+    "_id": "5fe2cefb8559b500011412fb",
+    "data_own_department__l": [
+      {
+        "parentId": "999999",
+        "deptId": "1000",
+        "deptName": "董事会",
+        "status": 0
+      }
+    ],
+    "status": "1",
+    "stop_time": 1608700173559,
+    "main_department__l": [
+      {
+        "parentId": "999999",
+        "deptId": "1000",
+        "deptName": "董事会",
+        "status": 0
+      }
+    ],
+    "main_department__r": {
+      "deptName": "董事会",
+      "deptId": "1000",
+      "parentId": "999999",
+      "status": 0
+    },
+    "phone__p": {
+      "mobile": "15276864790",
+      "province": "新疆",
+      "city": "乌鲁木齐",
+      "code": "0991",
+      "operator": "移动",
+      "mobilePath": "新疆乌鲁木齐 移动"
+    },
+    "is_deleted": false,
+    "owner__l": [
+      {
+        "id": "1516",
+        "tenantId": "590163",
+        "name": "321蒋dsa小船1122212",
+        "picAddr": "",
+        "email": "",
+        "nickname": "321蒋dsa小船1122212",
+        "supervisorId": "0",
+        "phone": "",
+        "description": "",
+        "status": 1,
+        "createTime": 1608699643328,
+        "modifyTime": 1608700173625,
+        "dept": "1000",
+        "post": ""
+      }
+    ],
+    "relevant_team__r": "321蒋dsa小船1122212",
+    "owner__r": {
+      "picAddr": "",
+      "description": "",
+      "dept": "1000",
+      "supervisorId": "0",
+      "modifyTime": 1608700173625,
+      "post": "",
+      "createTime": 1608699643328,
+      "phone": "",
+      "name": "321蒋dsa小船1122212",
+      "nickname": "321蒋dsa小船1122212",
+      "tenantId": "590163",
+      "id": "1516",
+      "email": "",
+      "status": 1
+    },
+    "owner": [
+      "FSUID_56AE2B41FD274A4D1D885209AB1F27CC"
+    ],
+    "is_active": true,
+    "last_modified_time": 1608700173625,
+    "life_status": "normal",
+    "sex": "M",
+    "last_modified_by__l": [
+      {
+        "id": "1453",
+        "tenantId": "590163",
+        "name": "蒋小川1",
+        "picAddr": "",
+        "email": "",
+        "nickname": "蒋小川1",
+        "supervisorId": "1006",
+        "phone": "",
+        "description": "",
+        "status": 0,
+        "createTime": 1587462141009,
+        "modifyTime": 1591759818876,
+        "dept": "1000",
+        "post": ""
+      }
+    ],
+    "created_by__l": [
+      {
+        "id": "1453",
+        "tenantId": "590163",
+        "name": "蒋小川1",
+        "picAddr": "",
+        "email": "",
+        "nickname": "蒋小川1",
+        "supervisorId": "1006",
+        "phone": "",
+        "description": "",
+        "status": 0,
+        "createTime": 1587462141009,
+        "modifyTime": 1591759818876,
+        "dept": "1000",
+        "post": ""
+      }
+    ],
+    "last_modified_by": [
+      "FSUID_CBF443F942C4ABE8A46BE859066A5CD1"
+    ],
+    "main_department": [
+      "1000"
+    ],
+    "is_pause_login": false,
+    "record_type": "default__c",
+    "last_modified_by__r": {
+      "picAddr": "",
+      "description": "",
+      "dept": "1000",
+      "supervisorId": "1006",
+      "modifyTime": 1591759818876,
+      "post": "",
+      "createTime": 1587462141009,
+      "phone": "",
+      "name": "蒋小川1",
+      "nickname": "蒋小川1",
+      "tenantId": "590163",
+      "id": "1453",
+      "email": "",
+      "status": 0
+    }
+  },
+  "errorDescription": "success",
+  "errorMessage": "OK",
+  "errorCode": 0
+}
