@@ -182,8 +182,8 @@ public class ScrmTest {
                     long li = Long.parseLong(lds_idi);//遍历list里每一个线索的id
 
 //                    long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
-                    System.out.println("当前线索ID:"+li);
-                    System.out.println("Redis线索ID:"+l);
+//                    System.out.println("当前线索ID:"+li);
+//                    System.out.println("Redis线索ID:"+l);
                     if (li == l) {
                         flag=1;
                         break;
@@ -212,32 +212,50 @@ public class ScrmTest {
 
         if(arrayList.size()!=0){
             //有新线索
+            int ver=0;//计数
             for (JSONObject leads : arrayList) {
                 String lds_id = (String) leads.get("lds_id");
+                System.out.println("当前线索id:"+lds_id+",为第"+ver+"个线索");
+                ver++;
                 String mobile = (String) leads.get("mobile");
                 String email = (String) leads.get("email");
                 String lds_belonger = (String) leads.get("lds_belonger");
-                //线索手机号查重
-                if (!"".equals(mobile)) {//不为空进行查重
-                    int checkTheLeadsPhoneNumber = duplicateCheckService.checkTheLeadsPhoneNumber(lds_id, mobile);
-                    if (checkTheLeadsPhoneNumber == 1) {
-                        //线索手机号重复
-                        continue;
+                try{
+                    //线索手机号查重
+                    if (!"".equals(mobile)&&mobile.length()>5) {//不为空进行查重
+                        if(mobile.contains("+")&&mobile.contains(" ")) {
+                            String[] s = mobile.split(" ");
+                            mobile=s[1];
+                        }
+                        int checkTheLeadsPhoneNumber = duplicateCheckService.checkTheLeadsPhoneNumber(lds_id, mobile);
+                        System.out.println("手机号查重"+checkTheLeadsPhoneNumber);
+                        if (checkTheLeadsPhoneNumber == 1) {
+                            //线索手机号重复
+                            continue;
+                        }
                     }
+                    //线索邮箱查重
+                    if(!"".equals(email)) {
+                        int checkTheLeadsEmail = duplicateCheckService.checkTheLeadsEmail(lds_id, email);
+                        System.out.println("邮箱查重"+checkTheLeadsEmail);
+                        if (checkTheLeadsEmail == 1) {
+                            //线索邮箱重复
+                            continue;
+                        }
+                    }
+                    //联系人手机号查重
+                    //联系人电话查重
+                    //联系人邮箱查重
+                    //客户名称查重
+                    //联系人邮箱域名查重
+                    //线索邮箱域名查重
+                    //线索公司名称查重
+                }catch(Exception e){
+                    log.error("线索查重异常" + lds_id);
+                    System.out.println("线索查重异常" + lds_id);
                 }
-                //线索邮箱查重
-                int checkTheLeadsEmail = duplicateCheckService.checkTheLeadsEmail(lds_id, email);
-                if (checkTheLeadsEmail == 1) {
-                    //线索邮箱重复
-                    continue;
-                }
-                //联系人手机号查重
-                //联系人电话查重
-                //联系人邮箱查重
-                //客户名称查重
-                //联系人邮箱域名查重
-                //线索邮箱域名查重
-                //线索公司名称查重
+
+
 
                 //根据lds_belonger查openUserId
                 String openUserId = null;
@@ -247,18 +265,19 @@ public class ScrmTest {
                     try {
                         openUserId = CRMAPIService.queryOpenUserIdByName(lds_belonger);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        log.error("根据lds_belonger查openUserId失败"+e);
+                        System.out.println("根据lds_belonger查openUserId失败");
                     }
 
                 }
 
                 //2.1 创建一个新线索
-                String objectIds;
+                String objectIds=null;
                 try {
                     objectIds = CRMAPIService.createLeadsObj(leads,openUserId);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error("创建新线索 " + leads.get("lds_id") + " 失败");
-                    throw new RuntimeException(e);
+                    System.out.println("创建新线索 " + leads.get("lds_id") + " 失败");
                 }
 
 
@@ -274,8 +293,9 @@ public class ScrmTest {
                 //2.3 致趣线索映射到crm新线索
                 try {
                     String result1 = SCRMAPIService.updateLead(lds_id, "member_27105", objectIds);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    log.error("致趣线索映射到crm新线索失败"+e);
+                    System.out.println("致趣线索映射到crm新线索失败");
                 }
 
 

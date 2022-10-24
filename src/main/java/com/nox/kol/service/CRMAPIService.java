@@ -9,6 +9,7 @@ import com.nox.kol.exception.KOLException;
 import com.nox.kol.vo.AllocateVo;
 import com.nox.kol.vo.CreateVo;
 import com.nox.kol.vo.QueryVo;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
+@Slf4j
 public class CRMAPIService {
     private final static Logger logger = LoggerFactory.getLogger(SCRMAPIService.class);
 
@@ -770,7 +772,7 @@ public class CRMAPIService {
         QueryVo queryVo = new QueryVo();
         queryVo.setCorpAccessToken(corpAccessToken);
         queryVo.setCorpId(corpId);
-        queryVo.setCurrentOpenUserId(currentOpenUserId);
+        queryVo.setCurrentOpenUserId("FSUID_DF19B419FD388B884C7B2BDD179E0149");
         queryVo.setData(dataDTO);
 
         String requestBody = JSON.toJSONString(queryVo);
@@ -800,7 +802,7 @@ public class CRMAPIService {
      * @return
      * @throws IOException
      */
-    public String createLeadsObj(JSONObject leads,String openUserId) throws IOException {
+    public String createLeadsObj(JSONObject leads,String openUserId) throws Exception {
         //先把线索除owner使用创建线索接口插入
         //根据返回的 "dataId"插入owner
         String corpAccessToken = (String) redisTemplate.opsForValue().get("corpAccessToken");
@@ -817,7 +819,11 @@ public class CRMAPIService {
         objectDataDTO.setName((String) leads.get("name"));
         objectDataDTO.setField_aEh03__c((String) leads.get("sex"));
         String mobile = (String) leads.get("mobile");
-        mobile = mobile.replace(" ", "");
+        if(mobile.contains("+")&&mobile.contains(" ")){
+            String[] s = mobile.split(" ");
+            objectDataDTO.setMobile_pre__c(s[0]);
+            mobile=s[1];
+        }
         objectDataDTO.setMobile(mobile);
         objectDataDTO.setEmail((String) leads.get("email"));
         objectDataDTO.setAddress((String) leads.get("address"));
@@ -1040,11 +1046,12 @@ public class CRMAPIService {
 
         String requestBody = JSON.toJSONString(queryVo);
 
+        String userId = null;
         try {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType,requestBody );
+            RequestBody body = RequestBody.create(mediaType, requestBody);
             Request request = new Request.Builder()
                     .url("https://open.fxiaoke.com/cgi/crm/v2/data/query")
                     .method("POST", body)
@@ -1056,12 +1063,13 @@ public class CRMAPIService {
             JSONObject data = jsonObject.getJSONObject("data");
             JSONArray dataList = data.getJSONArray("dataList");
             JSONObject jsonObject1 = dataList.getJSONObject(0);
-            String userId = (String) jsonObject1.get("user_id");
+            userId = (String) jsonObject1.get("user_id");
             return userId;
         } catch (Exception e) {
-            logger.error("requestLeadList Failed Cause By {}", e);
-            throw e;
+            log.error("queryOpenUserIdByName 失败(可能是crm没有录入所属人，如孙文鑫) {}", e);
+
         }
+        return userId;
     }
 
 }

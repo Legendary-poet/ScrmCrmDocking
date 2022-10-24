@@ -535,7 +535,7 @@ public class CrmTest {
     public void searchBdNameById(){
         String result =null;
         try {
-            String openUserId="FSUID_DF19B419FD388B884C7B2BDD179E0149";
+            String openUserId="FSUID_E5C57E7915E35CA1B135CC5AD1E142AE";
 //            String openUserId="FSUID_DF19B419FD388B884C7B2BDD179E0149";
             result=  CRMAPIService.searchBdNameById(openUserId);
 

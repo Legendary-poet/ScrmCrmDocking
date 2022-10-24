@@ -12,10 +12,7 @@ import com.nox.kol.utils.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -46,44 +43,15 @@ public class ExcelController {
 //        }
     }
 
-//    @RequestMapping(value = "/testFileExcel")
-//    public void testFileExcel(MultipartFile file) throws IOException {
-//        // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
-//        // 这里每次会读取100条数据 然后返回过来 直接调用使用数据就行
-//        EasyExcel.read(file.getInputStream(), User.class, new PageReadListener<User>(dataList -> {
-////            try {
-////                uploadingExcel.uploadingLocalExcel(dataList);
-////            } catch (IOException e) {
-////                throw new RuntimeException(e);
-////            }
-//            for (User demoData : dataList) {
-//                // 这里就是你处理代码保存的逻辑了
-////                log.info("读取到一条数据{}", JSON.toJSONString(demoData));
-//                System.out.println(demoData.toString());
-//
-//            }
-//        })).sheet(0).doRead();
-//    }
 
 
-//    @PostMapping("/testFileExcel")
-//    public String testFileExcel(MultipartFile file) throws IOException {
-//        // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
-//        // 这里每次会读取100条数据 然后返回过来 直接调用使用数据就行
-//        EasyExcel.read(file.getInputStream(), User.class, new PageReadListener<User>(dataList -> {
-//            for (User user : dataList) {
-//                // 这里就是你处理代码保存的逻辑了
-//                log.info("读取到一条数据{}", JSON.toJSONString(user));
-//                System.out.println(user.toString());
-//            }
-//        })).sheet(0).doRead();
-//        return null;
-//    }
-    @PostMapping("/upload")
-    public String upload(MultipartFile file) throws IOException {
-        EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener()).sheet().doRead();
 
-        return "success";
+
+    @GetMapping("/test")
+    public String test(){
+
+        return "test成功";
     }
+
 
 }

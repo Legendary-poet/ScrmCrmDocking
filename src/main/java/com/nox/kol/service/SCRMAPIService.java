@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.nox.kol.constant.ErrorConstant;
 import com.nox.kol.exception.KOLException;
 import com.nox.kol.utils.MD5Utils;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 @Service
+@Slf4j
 public class SCRMAPIService {
     private final static Logger logger = LoggerFactory.getLogger(SCRMAPIService.class);
 
@@ -114,7 +116,7 @@ public class SCRMAPIService {
         return sb.toString();
     }
 
-    public String buildToken(TreeMap<String, Object> params) {
+    public String buildToken(TreeMap<String, Object> params)  {
         String token = null;
         if (params.isEmpty()) {
             throw new KOLException(ErrorConstant.ERROR_NUM_10022, ErrorConstant.ERROR_MESSAGE_10022_STR);
@@ -149,11 +151,7 @@ public class SCRMAPIService {
         try {
 //            String encode = URLEncoder.encode(httpStr, "UTF-8");
             String encode = URLEncoder.encode(httpStr, "UTF-8");
-            System.out.println(httpStr);
-            System.out.println(encode);
             token = MD5Utils.generateMD5(encode);
-//            token = MD5Utils.generateMD5("mid32088page1per_page50pkyduodiankeji202208srcduodiankejitim1552992261updated_at%5Bstart_time%5D2022-10-13updated_at%5Bend_time%5D2022-10-14");
-            System.out.println(token);
         } catch (Exception e) {
             logger.error(e.getMessage());
 
@@ -440,7 +438,7 @@ public class SCRMAPIService {
      * @return
      * @throws IOException
      */
-    public String updateLead(String leads_id,String field,String value ) throws IOException{
+    public String updateLead(String leads_id,String field,String value ) throws Exception{
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> params1 = new HashMap<>();
 
@@ -448,7 +446,7 @@ public class SCRMAPIService {
         params.put("pky", pky);
         params.put("mid", mainId);
         params.put("tim", (System.currentTimeMillis() / 1000));
-        System.out.println((System.currentTimeMillis() / 1000));
+//        System.out.println((System.currentTimeMillis() / 1000));
 
         params.put("leads_id", leads_id);
         params.put("3rd_party_id", "");
@@ -466,7 +464,7 @@ public class SCRMAPIService {
             tokenBuildMap.put(key, params.get(key));
         }
         String token = buildToken(tokenBuildMap);
-        System.out.println(token);
+//        System.out.println(token);
 
         params.put("tok", token);
 //        params.put("tok", "2579ffab06769dca74f561e74731d46b");

@@ -80,6 +80,9 @@ public class CreateVo {
             @JsonProperty("field_YX2nF__c")
             private String field_YX2nF__c;//线索类型
 
+            @JsonProperty("mobile_pre__c")
+            private String mobile_pre__c;//手机号前缀
+
 
         }
 

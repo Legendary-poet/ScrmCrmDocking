@@ -2,6 +2,7 @@ package com.nox.kol.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
+@Slf4j
 public class DuplicateCheckService {
     @Autowired
     private CRMAPIService CRMAPIService;
@@ -64,20 +66,31 @@ public class DuplicateCheckService {
             JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("dataList");
             if (jsonArray.size() == 0) {
                 return 0;//没有重复
-            } else if (jsonArray.size() == 1) {
+            } else if (jsonArray.size() >= 1) {
                 //1将致趣线索和crm老线索映射
                 //1.1线索id，所属bd,线索状态（判断线索是否转化）
                 String crmId = jsonArray.getJSONObject(0).getString("_id");
-                String crmOwner = jsonArray.getJSONObject(0).getJSONArray("owner").get(0).toString();
+                String crmOwner=null;
+                try{
+
+                    crmOwner = jsonArray.getJSONObject(0).getJSONArray("owner").get(0).toString();
+                }catch(Exception e){
+                    System.out.println("当前线索没有owner");
+                }
+
 //                String crmOwner = jsonArray.getJSONObject(0).getString("owner");
                 String conversion = jsonArray.getJSONObject(0).getString("field_thOe1__c");//线索状态（转化）
 
 
                 //根据线索所属人id查所属人name
-                String result6 = CRMAPIService.searchBdNameById(crmOwner);//
-                JSONObject jsonObject6 = JSONObject.parseObject(result6);
-                JSONArray jsonArray6 = jsonObject6.getJSONObject("data").getJSONArray("dataList");
-                String crmOwnerName = jsonArray6.getJSONObject(0).getString("name");//线索所属人BD name
+                String crmOwnerName=null;//线索所属人BD name
+                if (crmOwner!=null) {
+                    String result6 = CRMAPIService.searchBdNameById(crmOwner);//
+                    JSONObject jsonObject6 = JSONObject.parseObject(result6);
+                    JSONArray jsonArray6 = jsonObject6.getJSONObject("data").getJSONArray("dataList");
+
+                    crmOwnerName = jsonArray6.getJSONObject(0).getString("name");
+                }
 
                 //1.2查询crm的线索id和bd（所属人），  修改scrm
 
@@ -134,7 +147,8 @@ public class DuplicateCheckService {
             }
 
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println("线索电话号码查重失败"+e.toString());
+            log.error("线索电话号码查重失败{}",e);
         }
         System.out.println(result);
         return 2;//异常
@@ -150,18 +164,29 @@ public class DuplicateCheckService {
             JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("dataList");
             if (jsonArray.size() == 0) {
                 return 0;//没有重复
-            } else if (jsonArray.size() == 1) {
+            } else if (jsonArray.size() >= 1) {
                 //1将致趣线索和crm老线索映射
                 //1.1线索id，所属bd,线索状态（判断线索是否转化）
                 String crmId = jsonArray.getJSONObject(0).getString("_id");
-                String crmOwner = jsonArray.getJSONObject(0).getJSONArray("owner").get(0).toString();
+                String crmOwner=null;
+                try{
+
+                    crmOwner = jsonArray.getJSONObject(0).getJSONArray("owner").get(0).toString();
+                }catch(Exception e){
+                    System.out.println("当前线索没有owner");
+                }
                 String conversion = jsonArray.getJSONObject(0).getString("field_thOe1__c");//线索状态（转化）
 
                 //根据线索所属人id查所属人name
-                String result6 = CRMAPIService.searchBdNameById(crmOwner);//
-                JSONObject jsonObject6 = JSONObject.parseObject(result6);
-                JSONArray jsonArray6 = jsonObject6.getJSONObject("data").getJSONArray("dataList");
-                String crmOwnerName = jsonArray6.getJSONObject(0).getString("name");//线索所属人BD name
+                //根据线索所属人id查所属人name
+                String crmOwnerName=null;//线索所属人BD name
+                if (crmOwner!=null) {
+                    String result6 = CRMAPIService.searchBdNameById(crmOwner);//
+                    JSONObject jsonObject6 = JSONObject.parseObject(result6);
+                    JSONArray jsonArray6 = jsonObject6.getJSONObject("data").getJSONArray("dataList");
+
+                    crmOwnerName = jsonArray6.getJSONObject(0).getString("name");
+                }
 
                 //1.2查询crm的线索id和bd（所属人），  修改scrm
 
@@ -211,13 +236,12 @@ public class DuplicateCheckService {
                 }
 
                 return 1;//有重复
-            } else if (jsonArray.size() > 1) {
-                //TODO : 抛异常，正常情况下crm里不应该有两个线索
-
             }
 
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println("线索邮箱查重失败"+e.toString());
+            log.error("线索邮箱查重失败{}",e);
+
         }
         System.out.println(result);
         return 2;//异常
