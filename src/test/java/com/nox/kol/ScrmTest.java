@@ -38,7 +38,7 @@ public class ScrmTest {
 
     @Test
     public void testRedis(){
-        redisTemplate.opsForValue().set("latestLeadid","18059720");
+        redisTemplate.opsForValue().set("latestLeadid","18084938");
     }
 
     @Test
