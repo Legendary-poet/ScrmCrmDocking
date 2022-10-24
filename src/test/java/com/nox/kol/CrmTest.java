@@ -581,7 +581,7 @@ public class CrmTest {
                     "        \"member_26416\": \"31244475521c956ac4411477e78fff5d\",\n" +
                     "        \"member_26417\": \"50-100\",\n" +
                     "        \"member_tags_num\": 1,\n" +
-                    "        \"mobile\": \"+82 1047592346\",\n" +
+                    "        \"mobile\": \"+821047592346\",\n" +
                     "        \"mobile_type\": \"86\",\n" +
                     "        \"name\": \"조아연\",\n" +
                     "        \"points\": 0,\n" +
@@ -593,7 +593,8 @@ public class CrmTest {
                     "        \"lds_record\": \"\"\n" +
                     "      }";
             JSONObject leads = JSONObject.parseObject(s);
-            result=  CRMAPIService.createLeadsObj(leads);
+            String openUserId=null;
+            result=  CRMAPIService.createLeadsObj(leads,openUserId);
 
 
 

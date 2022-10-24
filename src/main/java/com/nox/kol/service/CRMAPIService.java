@@ -800,7 +800,7 @@ public class CRMAPIService {
      * @return
      * @throws IOException
      */
-    public String createLeadsObj(JSONObject leads) throws IOException {
+    public String createLeadsObj(JSONObject leads,String openUserId) throws IOException {
         //先把线索除owner使用创建线索接口插入
         //根据返回的 "dataId"插入owner
         String corpAccessToken = (String) redisTemplate.opsForValue().get("corpAccessToken");
@@ -812,11 +812,13 @@ public class CRMAPIService {
         createVo.setCurrentOpenUserId(currentOpenUserId);
 
         CreateVo.DataDTO dataDTO = new CreateVo.DataDTO();
-        dataDTO.setDataObjectApiName((String) leads.get("LeadsObj"));
+        dataDTO.setDataObjectApiName("LeadsObj");
         CreateVo.DataDTO.ObjectDataDTO objectDataDTO = new CreateVo.DataDTO.ObjectDataDTO();
         objectDataDTO.setName((String) leads.get("name"));
         objectDataDTO.setField_aEh03__c((String) leads.get("sex"));
-        objectDataDTO.setMobile((String) leads.get("mobile"));
+        String mobile = (String) leads.get("mobile");
+        mobile = mobile.replace(" ", "");
+        objectDataDTO.setMobile(mobile);
         objectDataDTO.setEmail((String) leads.get("email"));
         objectDataDTO.setAddress((String) leads.get("address"));
         objectDataDTO.setCompany((String) leads.get("member_25956"));
@@ -825,18 +827,24 @@ public class CRMAPIService {
         objectDataDTO.setRemark((String) leads.get("member_26227"));
 
         objectDataDTO.setField_21Y8q__c((String) leads.get("member_26228"));
-        objectDataDTO.setField_m1ubR__c((String) leads.get("points"));//剩余积分
-//        objectDataDTO.setOwner((List<String>) leads.get(""));
-        String source = (String) leads.get("lds_source_pid");//线索一级来源
-        source=source
-                .replace("直接注册","2")
-                .replace("线上直播","3")
-                .replace("公号投放","4")
-                .replace("线下活动","5")
-                .replace("官网","6")
-                .replace("投放","4")
-                .replace("官微咨询","7")
-                .replace("邮件咨询","8");
+        objectDataDTO.setField_m1ubR__c(String.valueOf(leads.get("points")));//剩余积分
+        if(openUserId!=null){
+            objectDataDTO.setOwner(Collections.singletonList(openUserId));
+        }else {
+            objectDataDTO.setLeads_pool_id("634a503e455eb30001e9fc6d");
+        }
+
+
+        String source = leads.get("lds_source_pid").toString();//线索一级来源
+        source = source
+                .replace("直接注册", "2")
+                .replace("线上直播", "3")
+                .replace("公号投放", "4")
+                .replace("线下活动", "5")
+                .replace("官网", "6")
+                .replace("投放", "4")
+                .replace("官微咨询", "7")
+                .replace("邮件咨询", "8");
 //        objectDataDTO.setSource();//lds_source_pid
         objectDataDTO.setField_g26sD__c((String) leads.get("lds_source"));
         //todo 调用获取会员标签接口
@@ -844,16 +852,20 @@ public class CRMAPIService {
         objectDataDTO.setField_Rr4xw__c((String) leads.get(""));//sdr
         objectDataDTO.setField_G6s6C__c((String) leads.get("member_26416"));
         objectDataDTO.setField_35AB2__c((String) leads.get("lds_id"));//
-        objectDataDTO.setLeads_pool_id("634a503e455eb30001e9fc6d");
+
+
+        dataDTO.setObject_data(objectDataDTO);
+        createVo.setData(dataDTO);
 
 
         String requestBody = JSON.toJSONString(createVo);
 
+        String dataId;
         try {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType,requestBody );
+            RequestBody body = RequestBody.create(mediaType, requestBody);
             Request request = new Request.Builder()
                     .url("https://open.fxiaoke.com/cgi/crm/v2/data/create")
                     .method("POST", body)
@@ -862,14 +874,14 @@ public class CRMAPIService {
             Response response = client.newCall(request).execute();
             String result = response.body().string();
             JSONObject jsonObject = JSONObject.parseObject(result);
-            String dataId = (String) jsonObject.getJSONObject("data").get("dataId");
+            dataId = (String) jsonObject.get("dataId");
 
-            return dataId;
+
         } catch (Exception e) {
             logger.error("新线索创建失败", e);
             throw e;
         }
-
+        return dataId;
 
     }
 
@@ -982,7 +994,7 @@ public class CRMAPIService {
             Response response = client.newCall(request).execute();
             return response.body().string();
         } catch (Exception e) {
-            logger.error("requestLeadList Failed Cause By {}", e);
+//            logger.error("requestLeadList Failed Cause By {}", e);
             throw e;
         }
 

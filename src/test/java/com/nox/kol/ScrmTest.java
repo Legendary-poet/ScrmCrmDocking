@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 @SpringBootTest(classes = ScrmCrmDockingApplication.class)
 @EnableAsync
@@ -37,7 +38,7 @@ public class ScrmTest {
 
     @Test
     public void testRedis(){
-        redisTemplate.opsForValue().set("latestLeadid","17868261");
+        redisTemplate.opsForValue().set("latestLeadid","18059720");
     }
 
     @Test
@@ -181,13 +182,13 @@ public class ScrmTest {
                     long li = Long.parseLong(lds_idi);//遍历list里每一个线索的id
 
 //                    long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
-                    System.out.println(li);
-                    System.out.println(l);
+                    System.out.println("当前线索ID:"+li);
+                    System.out.println("Redis线索ID:"+l);
                     if (li == l) {
                         flag=1;
                         break;
                     }
-                    //TODO : 存储线索
+                    // 存储线索
                     arrayList.add(objecti);
                 }
 
@@ -205,8 +206,9 @@ public class ScrmTest {
                 System.out.println(e.toString());
             }
         }
-        System.out.println(arrayList);
-        System.out.println("测试");
+        Collections.reverse(arrayList);
+//        System.out.println(arrayList);
+//        System.out.println("测试");
 
         if(arrayList.size()!=0){
             //有新线索
@@ -237,34 +239,41 @@ public class ScrmTest {
                 //线索邮箱域名查重
                 //线索公司名称查重
 
+                //根据lds_belonger查openUserId
+                String openUserId = null;
+                System.out.println(lds_belonger);
+                System.out.println(lds_belonger.equals(""));
+                if(!lds_belonger.equals("")){
+                    try {
+                        openUserId = CRMAPIService.queryOpenUserIdByName(lds_belonger);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
 
                 //2.1 创建一个新线索
                 String objectIds;
                 try {
-                    objectIds = CRMAPIService.createLeadsObj(leads);
+                    objectIds = CRMAPIService.createLeadsObj(leads,openUserId);
                 } catch (IOException e) {
                     log.error("创建新线索 " + leads.get("lds_id") + " 失败");
                     throw new RuntimeException(e);
                 }
 
-                //根据lds_belonger查openUserId
-                String openUserId = null;
-                try {
-                    openUserId = CRMAPIService.queryOpenUserIdByName(lds_belonger);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+
                 ;
-                //2.2 给leads分配owner
-                try {
-                    result = CRMAPIService.allocateOwner(objectIds, openUserId);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+//                //2.2 给leads分配owner
+//                try {
+//                    result = CRMAPIService.allocateOwner(objectIds, openUserId);
+//                } catch (IOException e) {
+//                    log.error("线索{}分配owner失败:{}",objectIds,e);
+//
+//                }
 
                 //2.3 致趣线索映射到crm新线索
                 try {
-                    String result1 = SCRMAPIService.updateLead(lds_id, "member_27105", openUserId);
+                    String result1 = SCRMAPIService.updateLead(lds_id, "member_27105", objectIds);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

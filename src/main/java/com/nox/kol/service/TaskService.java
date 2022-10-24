@@ -27,14 +27,24 @@
 //import org.springframework.scheduling.annotation.Scheduled;
 //import org.springframework.stereotype.Component;
 //
+//import java.io.IOException;
 //import java.text.SimpleDateFormat;
 //import java.util.ArrayList;
+//import java.util.Collections;
 //
 //@Component
 //public class TaskService {
 //
+//
 //    @Autowired
 //    private SCRMAPIService SCRMAPIService;
+//
+//    @Autowired
+//    private CRMAPIService CRMAPIService;
+//
+//    @Autowired
+//    private DuplicateCheckService duplicateCheckService;
+//
 //
 //    @Autowired
 //    private RedisTemplate redisTemplate;
@@ -47,14 +57,31 @@
 ////	public void reportCurrentTime() {
 ////		log.info("The time is now {}", dateFormat.format(new Date()));
 ////	}
+//    @Scheduled(fixedRate = 6800)
+//    public void getCorpAccessToken() {
+//        String result =null;
+//        try {
+//            result=  CRMAPIService.getCorpAccessToken();
+//            JSONObject jsonObject = JSONObject.parseObject(result);
+//            String corpAccessToken = (String) jsonObject.get("corpAccessToken");
+//            String corpId = (String) jsonObject.get("corpId");
+//
+//            redisTemplate.opsForValue().set("corpAccessToken",corpAccessToken);
+//            redisTemplate.opsForValue().set("corpId",corpId);
+//
+//        } catch (Exception e) {
+//            System.out.println(e.toString());
+//        }
+//
+//    }
 //
 //
-//	@Scheduled(fixedRate = 10*60*1000)
+//	@Scheduled(fixedRate = 30*60*1000)
 //	public void getNewLeads(){
 //        String result =null;//存储返回的json字符串
 //        int flag=0;//标志位 如果查到lds_id就变1
 //        int flag2=0;//查询最新id的标志位
-//        ArrayList<String> arrayList = new ArrayList();//存储最新数据
+//        ArrayList<JSONObject> arrayList = new ArrayList();//存储最新数据
 //        long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
 //        int page=1;
 ////        外层循环请求HTTP
@@ -62,7 +89,6 @@
 ////        设置标志位0。
 ////        如果id小于了就变1
 ////        break退出查询。
-//
 //        while(flag==0) {
 //            try {
 //                result = SCRMAPIService.requestLeadListPage(page);
@@ -71,40 +97,96 @@
 //                JSONObject data = jsonObject.getJSONObject("data");
 //                JSONArray list = data.getJSONArray("data");
 //
-//
 //                int size = list.size();
 //                for (Object o : list) {
 //                    JSONObject objecti = (JSONObject) o;
 //                    String lds_idi = (String) objecti.get("lds_id");
 //                    long li = Long.parseLong(lds_idi);//遍历list里每一个线索的id
 //
-////                    long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
 //                    System.out.println(li);
 //                    System.out.println(l);
 //                    if (li == l) {
 //                        flag=1;
 //                        break;
 //                    }
-//                    //TODO: 存储线索
-//                    arrayList.add(String.valueOf(objecti));
+//                    arrayList.add(objecti);
 //                }
-//
 //                if(flag2==0) {
 //                    JSONObject object = (JSONObject) list.get(0);
 //                    String lds_id = (String) object.get("lds_id");
-////                    long l = Long.parseLong(lds_id);
 //                    redisTemplate.opsForValue().set("latestLeadid",lds_id);
 //                    flag2=1;
-////                    System.out.println(l);
 //                }
-//
 //            } catch (Exception e) {
 //                System.out.println(e.toString());
 //            }
 //        }
-//        System.out.println(arrayList);
-//        System.out.println("测试");
+//        Collections.reverse(arrayList);
 //
+//        if(arrayList.size()!=0){
+//            //有新线索
+//            for (JSONObject leads : arrayList) {
+//                String lds_id = (String) leads.get("lds_id");
+//                String mobile = (String) leads.get("mobile");
+//                String email = (String) leads.get("email");
+//                String lds_belonger = (String) leads.get("lds_belonger");
+//                //线索手机号查重
+//                if (!"".equals(mobile)) {//不为空进行查重
+//                    int checkTheLeadsPhoneNumber = duplicateCheckService.checkTheLeadsPhoneNumber(lds_id, mobile);
+//                    if (checkTheLeadsPhoneNumber == 1) {
+//                        //线索手机号重复
+//                        continue;
+//                    }
+//                }
+//                //线索邮箱查重
+//                int checkTheLeadsEmail = duplicateCheckService.checkTheLeadsEmail(lds_id, email);
+//                if (checkTheLeadsEmail == 1) {
+//                    //线索邮箱重复
+//                    continue;
+//                }
+//                //联系人手机号查重
+//                //联系人电话查重
+//                //联系人邮箱查重
+//                //客户名称查重
+//                //联系人邮箱域名查重
+//                //线索邮箱域名查重
+//                //线索公司名称查重
+//
+//
+//                //2.1 创建一个新线索
+//                String objectIds;
+//                try {
+//                    objectIds = CRMAPIService.createLeadsObj(leads);
+//                } catch (IOException e) {
+//                    log.error("创建新线索 " + leads.get("lds_id") + " 失败");
+//                    throw new RuntimeException(e);
+//                }
+//
+//                //根据lds_belonger查openUserId
+//                String openUserId = null;
+//                try {
+//                    openUserId = CRMAPIService.queryOpenUserIdByName(lds_belonger);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//                ;
+//                //2.2 给leads分配owner
+//                try {
+//                    result = CRMAPIService.allocateOwner(objectIds, openUserId);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//
+//                //2.3 致趣线索映射到crm新线索
+//                try {
+//                    String result1 = SCRMAPIService.updateLead(lds_id, "member_27105", openUserId);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//
+//            }
+//
+//        }
 //
 //	}
 //}
