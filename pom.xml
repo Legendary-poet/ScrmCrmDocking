@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.nox</groupId>
-	<artifactId>kol</artifactId>
+	<artifactId>scdocking</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ScrmCrmDocking</name>
 	<description>ScrmCrmDocking</description>
