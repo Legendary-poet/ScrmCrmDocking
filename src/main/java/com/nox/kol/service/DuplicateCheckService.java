@@ -241,6 +241,7 @@ public class DuplicateCheckService {
         } catch (Exception e) {
             System.out.println("线索邮箱查重失败"+e.toString());
             log.error("线索邮箱查重失败{}",e);
+            e.printStackTrace();
 
         }
         System.out.println(result);
