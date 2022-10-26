@@ -637,5 +637,58 @@ public class SCRMAPIService {
         }
 
     }
+    /**
+     * 线索流转日志接口,查询线索跟进记录
+     * @return
+     * @throws IOException
+     */
+    public String requestLeadsFollowUpRecords(String mobile) throws IOException{
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("src", src);
+        params.put("pky", pky);
+        params.put("mid", mainId);
+        params.put("tim", "1666685965");
+//        System.out.println((System.currentTimeMillis() / 1000));
+
+        params.put("page", 1);
+        params.put("page_size", 50);
+
+        params.put("mobile",mobile);
+
+        TreeMap<String, Object> tokenBuildMap = new TreeMap<>();
+        Set<String> paramsKey = params.keySet();
+        Iterator<String> iterator = paramsKey.iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            tokenBuildMap.put(key, params.get(key));
+        }
+        String token = buildToken(tokenBuildMap);
+//        System.out.println(token);
+
+        params.put("tok", token);
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            String body = JSONObject.toJSONString(params);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("json"), body);
+            Request request = new Request.Builder()
+                    .url("https://leads.scrmtech.com/api/website/new-leads/circulation-list")
+                    .post(requestBody)
+                    .build();
+            Call call = okHttpClient.newCall(request);
+            Response execute = call.execute();
+            if (execute.code() != 200) {
+                throw new KOLException(ErrorConstant.ERROR_NUM_11002, ErrorConstant.ERROR_11002_ERROR);
+            }
+            String res=execute.body().string();
+            return res;
+        } catch (Exception e) {
+            logger.error("请求线索跟进记录失败", e);
+            throw e;
+        }
+
+    }
+
+
 
 }

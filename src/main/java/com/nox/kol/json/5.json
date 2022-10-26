@@ -1,0 +1,66 @@
+{
+  "code": 0,
+  "msg": "成功",
+  "data": {
+    "total": 4,
+    "total_page": 1,
+    "list": [
+      {
+        "id": "7128590",
+        "leads_id": "18076132",
+        "leads_stage": "SQL",
+        "leads_status": "跟进中",
+        "operator_id": "22131",
+        "receiver_id": "22131",
+        "owner_id": "22131",
+        "owner_name": "李哲",
+        "owner_department": "商务-北京总部",
+        "remake": "",
+        "describe": "李哲接收SQL",
+        "create_at": "2022-10-25 17:31"
+      },
+      {
+        "id": "7111371",
+        "leads_id": "18076132",
+        "leads_stage": "MQL",
+        "leads_status": "SQL(待接收)",
+        "operator_id": "21690",
+        "receiver_id": "22131",
+        "owner_id": "22131",
+        "owner_name": "李哲",
+        "owner_department": "商务-北京总部",
+        "remake": "",
+        "describe": "由马秋阳转出给李哲",
+        "create_at": "2022-10-24 17:04"
+      },
+      {
+        "id": "7111283",
+        "leads_id": "18076132",
+        "leads_stage": "MQL",
+        "leads_status": "待转出",
+        "operator_id": "21690",
+        "receiver_id": "21690",
+        "owner_id": "21690",
+        "owner_name": "马秋阳",
+        "owner_department": "SDR",
+        "remake": "",
+        "describe": "由马秋阳分派MQL给马秋阳",
+        "create_at": "2022-10-24 17:01"
+      },
+      {
+        "id": "7111012",
+        "leads_id": "18076132",
+        "leads_stage": "Raw leads",
+        "leads_status": "培育中",
+        "operator_id": "32088",
+        "receiver_id": "0",
+        "owner_id": "0",
+        "owner_name": "-",
+        "owner_department": "-",
+        "remake": "",
+        "describe": "进入线索池",
+        "create_at": "2022-10-24 16:42"
+      }
+    ]
+  }
+}

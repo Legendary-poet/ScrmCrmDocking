@@ -9,6 +9,7 @@ import com.nox.kol.exception.KOLException;
 import com.nox.kol.vo.AllocateVo;
 import com.nox.kol.vo.CreateVo;
 import com.nox.kol.vo.QueryVo;
+import com.nox.kol.vo.UpdateVo;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang.StringUtils;
@@ -851,7 +852,7 @@ public class CRMAPIService {
                 .replace("投放", "4")
                 .replace("官微咨询", "7")
                 .replace("邮件咨询", "8");
-//        objectDataDTO.setSource();//lds_source_pid
+        objectDataDTO.setSource(Integer.valueOf(source));//lds_source_pid
         objectDataDTO.setField_g26sD__c((String) leads.get("lds_source"));
         //todo 调用获取会员标签接口
         objectDataDTO.setField_215ot__c((String) leads.get(""));//标签
@@ -1070,6 +1071,53 @@ public class CRMAPIService {
 
         }
         return userId;
+    }
+
+    /**
+     * 修改线索对象信息,修改备注/标签字段。
+     * @param
+     * @throws IOException
+     */
+    public String updateLeads(String id,String record) throws Exception {
+
+        String corpAccessToken = (String) redisTemplate.opsForValue().get("corpAccessToken");
+        String corpId = (String) redisTemplate.opsForValue().get("corpId");
+
+        UpdateVo updateVo = new UpdateVo();
+        UpdateVo.DataDTO dataDTO = new UpdateVo.DataDTO();
+        UpdateVo.DataDTO.ObjectDataDTO objectDataDTO = new UpdateVo.DataDTO.ObjectDataDTO();
+
+        objectDataDTO.set_id(id);
+        objectDataDTO.setField_215ot__c(record);
+        objectDataDTO.setDataObjectApiName("LeadsObj");
+        dataDTO.setObject_data(objectDataDTO);
+        updateVo.setData(dataDTO);
+        updateVo.setCorpAccessToken(corpAccessToken);
+        updateVo.setCorpId(corpId);
+        updateVo.setCurrentOpenUserId("FSUID_74492535B6510CE5DD0010A8B42C5E3B");
+
+
+        String requestBody = JSON.toJSONString(updateVo);
+
+        String userId = null;
+        try {
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody body = RequestBody.create(mediaType, requestBody);
+            Request request = new Request.Builder()
+                    .url("https://open.fxiaoke.com/cgi/crm/v2/data/update")
+                    .method("POST", body)
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+            Response response = client.newCall(request).execute();
+            String result = response.body().string();
+            return result;
+        } catch (Exception e) {
+            throw e;
+
+        }
+
     }
 
 }

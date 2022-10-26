@@ -214,6 +214,9 @@ public class ScrmTest {
             //有新线索
             int ver=0;//计数
             for (JSONObject leads : arrayList) {
+//                if(ver==6){
+//                    break;
+//                }
                 String lds_id = (String) leads.get("lds_id");
                 System.out.println("当前线索id:"+lds_id+",为第"+ver+"个线索");
                 ver++;
@@ -525,4 +528,153 @@ public class ScrmTest {
 //
 //
 //    }
+
+
+    @Test
+    public void requestLeadsFollowUpRecords() throws IOException {
+        String result =null;
+        try {
+            String mobile ="+82 01034108223";
+            result=  SCRMAPIService.requestLeadsFollowUpRecords(mobile);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray list = data.getJSONArray("list");
+            JSONObject jsonObject1 = list.getJSONObject(0);
+
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+
+    @Test
+    public void updateFollowUpRecords() {
+        String result =null;//存储返回的json字符串
+        int flag=0;//标志位 如果查到lds_id就变1
+        int flag2=0;//查询最新id的标志位
+        ArrayList<JSONObject> arrayList = new ArrayList();//存储最新数据
+        long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
+        int page=1;
+
+        while(flag==0) {
+            try {
+                result = SCRMAPIService.requestLeadListPage(page);
+                page++;
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                JSONObject data = jsonObject.getJSONObject("data");
+                JSONArray list = data.getJSONArray("data");
+
+
+                int size = list.size();
+                for (Object o : list) {
+                    JSONObject objecti = (JSONObject) o;
+                    String lds_idi = (String) objecti.get("lds_id");
+                    long li = Long.parseLong(lds_idi);//遍历list里每一个线索的id
+
+//                    long l = Long.parseLong((String) redisTemplate.opsForValue().get("latestLeadid"));
+//                    System.out.println("当前线索ID:"+li);
+//                    System.out.println("Redis线索ID:"+l);
+                    if (li == l) {
+                        flag=1;
+                        break;
+                    }
+                    // 存储线索
+                    arrayList.add(objecti);
+                }
+
+                if(flag2==0) {
+                    JSONObject object = (JSONObject) list.get(0);
+                    String lds_id = (String) object.get("lds_id");
+//                    long l = Long.parseLong(lds_id);
+                    redisTemplate.opsForValue().set("latestLeadid",lds_id);
+                    flag2=1;
+//                    System.out.println(l);
+
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+        Collections.reverse(arrayList);
+//        System.out.println(arrayList);
+//        System.out.println("测试");
+
+        if(arrayList.size()!=0){
+            //有新线索
+            int ver=0;//计数
+            for (JSONObject leads : arrayList) {
+
+                String lds_id = (String) leads.get("lds_id");
+                System.out.println("当前线索id:" + lds_id + ",为第" + ver + "个线索");
+                log.info("当前线索id:" + lds_id);
+                ver++;
+                if (!leads.containsKey("mobile")) {
+                    continue;
+                }
+                String mobile = (String) leads.get("mobile");
+                if (!leads.containsKey("member_27105")) {
+                    continue;
+                }
+                String CrmId = (String) leads.get("member_27105");//crm线索id
+                String records = null;
+                try {
+
+                    String result3 = SCRMAPIService.requestLeadsFollowUpRecords(mobile);
+                    JSONObject jsonObject3 = JSONObject.parseObject(result3);
+                    JSONObject data3 = jsonObject3.getJSONObject("data");
+                    JSONArray list3 = data3.getJSONArray("list");
+                    JSONObject jsonObject4 = list3.getJSONObject(0);
+//                    String leads_stage = (String) jsonObject4.get("leads_stage");
+//                    String leads_status = (String) jsonObject4.get("leads_status");
+//                    String owner_name = (String) jsonObject4.get("owner_name");
+//                    String owner_department = (String) jsonObject4.get("owner_department");
+                    String remake = (String) jsonObject4.get("remake");
+//                    String describe = (String) jsonObject4.get("describe");
+//                    String create_at = (String) jsonObject4.get("create_at");
+                    if(remake==null){
+                        log.error("remake is null");
+                    }
+
+//                    records = "线索阶段:" + leads_stage + ",记录:" + describe + ",线索状态:" + leads_status + ",备注:" + remake + ",所属人:" + owner_name + ",所属部门" + owner_department;
+                    records = "备注:" + remake ;
+
+
+                } catch (Exception e) {
+                    log.error("查询跟进记录异常" + lds_id);
+                    System.out.println("查询跟进记录异常" + lds_id);
+                    e.printStackTrace();
+                }
+
+                try {
+                    String s = CRMAPIService.updateLeads(CrmId, records);
+                } catch (Exception e) {
+                    log.error("字段更新异常" + lds_id);
+                    System.out.println("字段更新异常" + lds_id);
+                    e.printStackTrace();
+                }
+
+
+            }
+
+        }
+
+    }
+
+    @Test
+    public void test111() {
+        try {
+            String s = CRMAPIService.updateLeads("6357df43b094b6000136fc77", "测试成功");
+        } catch (Exception e) {
+            log.error("字段更新异常");
+            System.out.println("字段更新异常");
+            e.printStackTrace();
+        }
+    }
+
+
 }
