@@ -849,9 +849,12 @@ public class CRMAPIService {
                 .replace("公号投放", "4")
                 .replace("线下活动", "5")
                 .replace("官网", "6")
-                .replace("投放", "4")
+                .replace("投放", "12")
                 .replace("官微咨询", "7")
-                .replace("邮件咨询", "8");
+                .replace("邮件咨询", "8")
+                .replace("置换", "10")
+                .replace("微信公众号","11");
+
         objectDataDTO.setSource(Integer.valueOf(source));//lds_source_pid
         objectDataDTO.setField_g26sD__c((String) leads.get("lds_source"));
         //todo 调用获取会员标签接口
